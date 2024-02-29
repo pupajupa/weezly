@@ -4,7 +4,7 @@ The Weezly project is a web store developed in Django. It provides users with th
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?color=%2336BCF7&lines=Maxim+Antikhovitch+,+253504)](https://git.io/typing-svg)
 ## Class diagram:
-![Screenshot](https://github.com/pupajupa/weezly/blob/main/weezly%20shop%20diagram.png)
+![Screenshot](https://github.com/pupajupa/weezly/blob/main/weezly%20diagram.png)
 
 ## List of application functions
 ### Application account:
