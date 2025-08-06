@@ -109,9 +109,3 @@ Add to .env:
 ### 🧪 Running Tests
 
       python manage.py test
-
-## License
-
-released under the [MIT License](LICENSE). Feel free to use, modify, and distribute it as per the terms of the license.
-
-Feel free to explore, contribute, and customize this according to your needs!
