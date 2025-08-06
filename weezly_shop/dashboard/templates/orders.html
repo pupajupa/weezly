@@ -1,34 +1,399 @@
-{% extends "dashboard.html" %}
-{% block content %}
-<table class="table">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">User</th>
-        <th scope="col">Id</th>
-        <th scope="col">total price</th>
-        <th scope="col">status</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    {% for order in orders %}
-    <tbody>
-      <tr>
-        <th scope="row">{{ forloop.counter }}</th>
-        <td>{{ order.user.full_name }}</td>
-        <td>{{ order.id }}</td>
-        <td>${{ order.get_total_price }}</td>
-        {% if order.status %}
-            <td class="text-success">Successful</td>
-        {% else %}
-            <td class="text-danger">Canceled</td>
+{% extends "dashboard.html" %} {% block content %}
+<!-- Header with actions -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="h4 mb-1">Orders</h2>
+        <p class="text-muted mb-0">Manage customer orders ({{ orders|length }} total)</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control border-start-0 ps-0" id="searchOrders" placeholder="Search orders..." />
+        </div>
+        <a href="#" class="btn btn-outline-primary d-flex align-items-center"> <i class="bi bi-download me-2"></i> Export </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <select class="form-select" id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="successful">Successful</option>
+                    <option value="canceled">Canceled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="dateFilter">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last_7_days">Last 7 Days</option>
+                    <option value="last_30_days">Last 30 Days</option>
+                    <option value="this_month">This Month</option>
+                    <option value="last_month">Last Month</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortFilter">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="price_low">Price: Low to High</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="button" class="btn btn-primary w-100">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card shadow-sm mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 60px">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAllOrders" />
+                            <label class="form-check-label" for="selectAllOrders"><span class="visually-hidden">Select All</span></label>
+                        </div>
+                    </th>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col" class="text-end">Total</th>
+                    <th scope="col" class="text-center">Date</th>
+                    <th scope="col" class="text-center">Status</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input order-select" type="checkbox" id="order-{{ order.id }}" />
+                            <label class="form-check-label" for="order-{{ order.id }}"><span class="visually-hidden">Select order</span></label>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="fw-medium">#{{ order.id }}</span>
+                            <small class="text-muted">{{ order.created_at|default_if_none:"" }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.875rem">{{ order.user.full_name|first|upper }}</div>
+                            <div>
+                                <span class="d-block">{{ order.user.full_name }}</span>
+                                <small class="text-muted">{{ order.user.email|default_if_none:"" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-end fw-medium">${{ order.get_total_price }}</td>
+                    <td class="text-center">
+                        <span>{{ order.created_at|date:"M d, Y"|default_if_none:"" }}</span>
+                    </td>
+                    <td class="text-center">
+                        {% if order.status %}
+                        <span class="badge bg-success-subtle text-success px-3 py-2">Successful</span>
+                        {% else %}
+                        <span class="badge bg-danger-subtle text-danger px-3 py-2">Canceled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'dashboard:order_detail' order.id %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <div class="dropdown">
+                                <button
+                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    type="button"
+                                    id="dropdownMenuButton{{ order.id }}"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ order.id }}">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'dashboard:order_detail' order.id %}"><i class="bi bi-eye me-2"></i>View Details</a>
+                                    </li>
+                                    {% if not order.status %}
+                                    <li>
+                                        <a class="dropdown-item text-success" href="#"><i class="bi bi-check-circle me-2"></i>Mark as Successful</a>
+                                    </li>
+                                    {% else %}
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#"><i class="bi bi-x-circle me-2"></i>Mark as Canceled</a>
+                                    </li>
+                                    {% endif %}
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#"><i class="bi bi-printer me-2"></i>Print Invoice</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="empty-state">
+                            <div class="mb-3">
+                                <i class="bi bi-cart-x text-muted" style="font-size: 3rem"></i>
+                            </div>
+                            <h5>No Orders Found</h5>
+                            <p class="text-muted">There are no orders to display.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bulk Actions Footer -->
+    <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
+        <div class="bulk-actions d-none">
+            <span class="me-3"><span id="selectedCount">0</span> orders selected</span>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-success">Mark as Successful</button>
+                <button type="button" class="btn btn-sm btn-outline-danger">Mark as Canceled</button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <nav aria-label="Order pagination" class="ms-auto">
+            <ul class="pagination pagination-sm mb-0">
+                {% if orders.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %} {% for i in orders.paginator.page_range %} {% if orders.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %} {% endfor %} {% if orders.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         {% endif %}
-        <td><a href="{% url 'dashboard:order_detail' order.id %}" class="text-primary text-decoration-none">Detail</a></td>
-      </tr>
-    </tbody>
-    {% endfor %}
-  </table>
-  
+    </div>
+</div>
 
+<!-- Order Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-primary-subtle text-primary me-3">
+                        <i class="bi bi-cart-check"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Total Orders</h5>
+                </div>
+                <h2 class="mb-1">{{ orders|length }}</h2>
+                <p class="text-muted small mb-0">All time orders</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-success-subtle text-success me-3">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Successful Orders</h5>
+                </div>
+                <h2 class="mb-1">{{ successful_orders|default:"0" }}</h2>
+                <p class="text-muted small mb-0">{{ successful_percentage|default:"0" }}% success rate</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-danger-subtle text-danger me-3">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Canceled Orders</h5>
+                </div>
+                <h2 class="mb-1">{{ canceled_orders|default:"0" }}</h2>
+                <p class="text-muted small mb-0">{{ canceled_percentage|default:"0" }}% cancellation rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for functionality -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select all functionality
+        const selectAllCheckbox = document.getElementById("selectAllOrders");
+        const orderCheckboxes = document.querySelectorAll(".order-select");
+        const bulkActions = document.querySelector(".bulk-actions");
+        const selectedCount = document.getElementById("selectedCount");
+
+        selectAllCheckbox.addEventListener("change", function () {
+            const isChecked = this.checked;
+            orderCheckboxes.forEach((checkbox) => {
+                checkbox.checked = isChecked;
+            });
+
+            updateBulkActionsVisibility();
+        });
+
+        orderCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                updateBulkActionsVisibility();
+
+                // Update "select all" checkbox state
+                const allChecked = Array.from(orderCheckboxes).every((cb) => cb.checked);
+                const someChecked = Array.from(orderCheckboxes).some((cb) => cb.checked);
+
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            });
+        });
+
+        function updateBulkActionsVisibility() {
+            const checkedBoxes = document.querySelectorAll(".order-select:checked");
+            if (checkedBoxes.length > 0) {
+                bulkActions.classList.remove("d-none");
+                selectedCount.textContent = checkedBoxes.length;
+            } else {
+                bulkActions.classList.add("d-none");
+            }
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById("searchOrders");
+        searchInput.addEventListener("input", function () {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll("tbody tr");
+
+            tableRows.forEach((row) => {
+                const orderId = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+                const customerName = row.querySelector("td:nth-child(3)").textContent.toLowerCase();
+
+                if (orderId.includes(searchTerm) || customerName.includes(searchTerm)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Icon circle */
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* Status badges */
+    .badge {
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    /* Table hover styles */
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    /* Custom checkbox styling */
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 2rem;
+    }
+
+    /* Button hover effects */
+    .btn-outline-primary:hover {
+        background-color: rgba(79, 70, 229, 0.1);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+    }
+
+    /* User avatar */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    /* Background subtle colors */
+    .bg-primary-subtle {
+        background-color: rgba(79, 70, 229, 0.1);
+    }
+
+    .bg-success-subtle {
+        background-color: rgba(16, 185, 129, 0.1);
+    }
+
+    .bg-danger-subtle {
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .text-success {
+        color: #10b981 !important;
+    }
+
+    .text-danger {
+        color: #ef4444 !important;
+    }
+</style>
 {% endblock %}
-

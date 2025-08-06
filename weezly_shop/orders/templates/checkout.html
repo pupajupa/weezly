@@ -1,14 +1,179 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <div class="order-status mb-3">
+            <i class="bi bi-check-lg text-white" style="font-size: 2.5rem"></i>
+        </div>
+        <h1 class="mb-2">Order Confirmed!</h1>
+        <p class="lead">Thank you for your purchase</p>
+        <div class="d-flex align-items-center justify-content-center gap-2">
+            <span>Payment completed via</span>
+            <img src="{% static 'images/paypal.png' %}" alt="PayPal" class="paypal-logo" />
+        </div>
+    </div>
 
-{% block content %}
-<div class="col-md-2"></div>
+    <!-- Order Information -->
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Order #{{ order.id }}</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="text-muted">Order Date: {{ order.created|date:"F j, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase fw-bold mb-3">Shipping Address</h6>
+                            <p class="mb-1">{{ order.user.full_name }}</p>
+                            <p class="mb-1">{{ order.user.address }}</p>
+                            <p class="mb-1">{{ order.user.city }}, {{ order.user.state }} {{ order.user.zip_code }}</p>
+                            <p class="mb-0">{{ order.user.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase fw-bold mb-3">Payment Information</h6>
+                            <p class="mb-1">PayPal Transaction ID:</p>
+                            <p class="mb-3 fw-bold">{{ order.payment_id }}</p>
+                            <p class="mb-1">Email:</p>
+                            <p class="mb-0">{{ order.user.email }}</p>
+                        </div>
+                    </div>
 
-<div class="col-md-8 border rounded p-3">
-    <h3 class="text-muted">Your Order Amount is: ${{order.get_total_price}}</h3>
-    <hr>
-    <p><b>Do you want to continue and pay?</b></p>
-    <a href="{% url 'cart:show_cart' %}" class="btn btn-danger">Back To Cart</a>
-    <a href="{% url 'orders:create_order' %}" class="btn btn-outline-success">Continue and pay</a>
-<div class="col-md-2"></div>
+                    <!-- Order Tracking -->
+                    <h6 class="text-uppercase fw-bold mb-4">Order Status</h6>
+                    <div class="row mb-5">
+                        <div class="col tracking-step">
+                            <div class="step-circle step-complete">
+                                <i class="bi bi-check"></i>
+                            </div>
+                            <p class="small text-center mt-2">Order Placed</p>
+                        </div>
+                        <div class="col tracking-step">
+                            <div class="step-circle step-complete">
+                                <i class="bi bi-check"></i>
+                            </div>
+                            <p class="small text-center mt-2">Payment Confirmed</p>
+                        </div>
+                        <div class="col tracking-step">
+                            <div class="step-circle step-active">
+                                <i class="bi bi-box"></i>
+                            </div>
+                            <p class="small text-center mt-2">Processing</p>
+                        </div>
+                        <div class="col tracking-step">
+                            <div class="step-circle">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <p class="small text-center mt-2">Shipped</p>
+                        </div>
+                        <div class="col tracking-step">
+                            <div class="step-circle">
+                                <i class="bi bi-house"></i>
+                            </div>
+                            <p class="small text-center mt-2">Delivered</p>
+                        </div>
+                    </div>
 
+                    <!-- Order Items -->
+                    <h6 class="text-uppercase fw-bold mb-3">Order Items</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col" class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="product-image rounded me-3" />
+                                            <div>
+                                                <h6 class="mb-0">{{ item.product.title }}</h6>
+                                                <small class="text-muted">SKU: {{ item.product.sku }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td class="text-end">${{ item.get_cost }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" class="text-end">Subtotal:</td>
+                                    <td class="text-end">${{ order.get_total_price }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-end">Shipping:</td>
+                                    <td class="text-end">$12.99</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-end">Tax (8%):</td>
+                                    <td class="text-end">${{ order.get_total_price|add:12.99|floatformat:2|mult:0.08 }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-end fw-bold">Total:</td>
+                                    <td class="text-end fw-bold">${{ order.get_total_price|add:12.99|floatformat:2 }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">What's Next?</h5>
+                    <p>You will receive an email confirmation with your order details and tracking information once your order ships.</p>
+                    <p class="mb-0">Estimated delivery: <strong>May 20 - May 23, 2023</strong></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                <a href="#" class="btn btn-outline-secondary"> <i class="bi bi-file-earmark-text me-2"></i>View Order Details </a>
+                <a href="#" class="btn btn-outline-secondary"> <i class="bi bi-envelope me-2"></i>Email Receipt </a>
+                <a href="/" class="btn btn-success"> <i class="bi bi-shop me-2"></i>Continue Shopping </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Support -->
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h5><i class="bi bi-question-circle me-2"></i>Need Help?</h5>
+                            <p class="mb-2">If you have any questions about your order:</p>
+                            <a href="#" class="btn btn-sm btn-outline-secondary">Contact Support</a>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="bi bi-star me-2"></i>Rate Your Experience</h5>
+                            <p class="mb-2">How was your shopping experience?</p>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-star-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-star-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-star-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-star"></i></button>
+                                <button class="btn btn-sm btn-outline-warning"><i class="bi bi-star"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

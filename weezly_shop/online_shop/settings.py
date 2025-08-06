@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'shop.apps.ShopConfig',
     'dashboard.apps.DashboardConfig',
+    'paypal.standard.ipn',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -129,11 +131,24 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_URL = 'accounts:user_login'
 
+AUTH_USER_MODEL = 'accounts.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'username@example.com'
-EMAIL_HOST_PASSWORD = 'your-password'
+EMAIL_HOST_USER = 'garilarulit@gmail.com'
+EMAIL_HOST_PASSWORD = 'gvvdtivscelialen'
+DEFAULT_FROM_EMAIL = 'garilarulit@gmail.com'
+
+PAYPAL_SECRET = "EAGUGv4FLya58u_1XOoG-YHx-7y_qMvAxtTB1EXp5Q_iu1rbcCC8KtZqMLSeB7NNwheWIKUwItEkKnj4"
+PAYPAL_RECEIVER_EMAIL="weezly@business.example.com"
+PAYPAL_TEST = True
+PAYPAL_CLIENT_ID = "ARd3aHm6H_S6R6UggacYcfGiv3sZ7YqdF2nqmlfmVDpKgjS2CESdlNdHnBa9T3HkrL81xKeaeafONqQR"
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

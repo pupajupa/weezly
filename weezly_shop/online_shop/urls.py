@@ -11,6 +11,7 @@ urlpatterns = [
     path('cart/', include('cart.urls', namespace='cart')),
     path('orders/', include('orders.urls', namespace='orders')),
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
+    path('', include('paypal.standard.ipn.urls')),
 ]
 
 

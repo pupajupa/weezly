@@ -33,7 +33,7 @@ def manager_login(request):
                 return redirect('dashboard:products')
             else:
                 messages.error(
-                    request, 'username or password is wrong', 'danger'
+                    request, 'Username or password is wrong', 'danger'
                 )
                 return redirect('accounts:manager_login')
     else:
@@ -53,7 +53,7 @@ def user_register(request):
             return redirect('accounts:user_login')
     else:
         form = UserRegistrationForm()
-    context = {'title':'Signup', 'form':form}
+    context = {'title':'Sign up', 'form':form}
     return render(request, 'register.html', context)
 
 
@@ -70,7 +70,7 @@ def user_login(request):
                 return redirect('shop:home_page')
             else:
                 messages.error(
-                    request, 'username or password is wrong', 'danger'
+                    request, 'Username or password is wrong', 'danger'
                 )
                 return redirect('accounts:user_login')
     else:

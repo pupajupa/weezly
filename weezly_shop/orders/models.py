@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 from accounts.models import User
@@ -9,7 +10,8 @@ class Order(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     status = models.BooleanField(default=False)
-
+    paid = models.BooleanField(default=False)
+    order_number = models.CharField(max_length=100, unique=True, default=uuid.uuid4)  # ← Добавлено
     class Meta:
         ordering = ('-created',)
 

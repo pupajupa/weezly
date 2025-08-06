@@ -1,46 +1,234 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
-<div class="container mt-4">
-  <h1 class="text-center mb-4">Our Products</h1>
-  {% if products %}
-  <div class="row">
-    {% for product in products.object_list %}
-    <div class="card me-2 mb-2 col-md-3" style="width: 16rem; min-height: 24rem;">
-      <img class="card-img-top mt-2" style="object-fit: contain; width: 100%; height: 200px;" src="{{ product.image.url }}" alt="{{ product.title }}">
-      <div class="card-body text-center d-flex flex-column">
-        <h5 class="card-title">{{ product.title }}</h5>
-        <p class="text-muted">${{ product.price }}</p>
-        <a href="{{ product.get_absolute_url }}" class="mt-auto mb-3 btn btn-outline-primary w-100">Buy Now</a>
-      </div>
+<div class="container py-5">
+    <!-- Shop Header -->
+    <div class="shop-header mb-5">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold mb-0">Our Products</h1>
+                <p class="text-muted mt-2">Discover our quality selection</p>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-md-end mt-3 mt-md-0">
+                    <!-- Filter/Sort Dropdown -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-sort-down me-1"></i> Sort
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                            <li><a class="dropdown-item" href="?sort=price_asc">Price: Low to High</a></li>
+                            <li><a class="dropdown-item" href="?sort=price_desc">Price: High to Low</a></li>
+                            <li><a class="dropdown-item" href="?sort=newest">Newest First</a></li>
+                            <li><a class="dropdown-item" href="?sort=popular">Most Popular</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- View Toggle -->
+                    <div class="btn-group view-toggle" role="group" aria-label="View options">
+                        <button type="button" class="btn btn-outline-secondary active" data-view="grid">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-view="list">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endfor %}
-  </div>
-  <!-- pagination -->
-  <center class="mt-5">
-    <div class="col-md-2">
-      <ul class="pagination">
-        {% if products.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">{{ products.previous_page_number }}</a></li>
-        {% endif %}
-        <li class="page-item active"><a class="page-link" href="?page={{ products.number }}">{{ products.number }}</a></li>
-        {% if products.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">{{ products.next_page_number }}</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">Next</a></li>
-        {% endif %}
-      </ul>
+
+    {% if products %}
+    <!-- Products Grid -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+        {% for product in products.object_list %}
+        <div class="col">
+            <div class="card h-100 product-card border-0 shadow-sm hover-effect">
+                <div class="position-relative">
+                    <div class="card-img-container bg-light p-4 text-center">
+                        <a href="{{ product.get_absolute_url }}">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                        </a>
+                    </div>
+                    <!-- Quick actions overlay -->
+                    <div class="product-actions">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-light rounded-circle" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+
+                        {% if user.is_authenticated and product in user.likes.all %}
+                        <a href="{% url 'shop:remove_from_favorites_shop_page' product.id %}" class="btn btn-sm btn-danger rounded-circle" title="Remove from Favorites">
+                            <i class="bi bi-heart-fill"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'shop:add_to_favorites_shop_page' product.id %}" class="btn btn-sm btn-light rounded-circle" title="Add to Favorites">
+                            <i class="bi bi-heart"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                    </h5>
+                    <p class="card-text fw-bold text-primary mb-0">${{ product.price }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 text-center p-3">
+                    <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary w-100"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-  </center>
-  {% else %}
-  <div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8 mt-5 pt-5 text-center">
-      <br>
-      <h3 class="text-muted text-capitalize">No Products..!</h3>
+
+    <!-- Pagination -->
+    <nav aria-label="Product pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="First">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="bi bi-chevron-double-left"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+            </li>
+            {% endif %} {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.previous_page_number }}"> {{ products.previous_page_number }} </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ products.number }}</span>
+            </li>
+
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.next_page_number }}"> {{ products.next_page_number }} </a>
+            </li>
+            {% endif %} {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.paginator.num_pages }}" aria-label="Last">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="bi bi-chevron-double-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center py-5">
+            <div class="empty-state p-4">
+                <div class="empty-state-icon mb-4">
+                    <i class="bi bi-bag-x" style="font-size: 4rem; color: #dee2e6"></i>
+                </div>
+                <h3 class="text-muted">No Products Available</h3>
+                <p class="text-muted mb-4">We don't have any products to show right now. Please check back later.</p>
+                <a href="{% url 'shop:home_page' %}" class="btn btn-primary"> <i class="bi bi-house me-2"></i>Return to Home </a>
+            </div>
+        </div>
     </div>
-    <div class="col-md-2"></div>
-  </div>
-  {% endif %}
+    {% endif %}
 </div>
+
+<!-- Add this to your CSS or in a style tag in your head -->
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .hover-effect:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .product-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 48px;
+    }
+
+    .card-img-container {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .product-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-actions {
+        opacity: 1;
+    }
+
+    .page-link {
+        color: #6c757d;
+        border-color: #dee2e6;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .empty-state {
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButtons = document.querySelectorAll(".view-toggle button");
+        const productContainer = document.querySelector(".row-cols-1");
+
+        toggleButtons.forEach((btn) => {
+            btn.addEventListener("click", function () {
+                toggleButtons.forEach((b) => b.classList.remove("active"));
+                this.classList.add("active");
+
+                const view = this.dataset.view;
+                if (view === "list") {
+                    productContainer.classList.remove("row-cols-sm-2", "row-cols-md-3", "row-cols-lg-5");
+                    productContainer.classList.add("row-cols-1");
+                } else {
+                    productContainer.classList.remove("row-cols-1");
+                    productContainer.classList.add("row-cols-sm-2", "row-cols-md-3", "row-cols-lg-5");
+                }
+            });
+        });
+    });
+</script>
+
 {% endblock %}

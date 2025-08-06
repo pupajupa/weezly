@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404
-
-from shop.models import Product
+from shop.tasks import check_price_tracking_for_product
+from shop.models import Product, Category
 from accounts.models import User
 from orders.models import Order, OrderItem
 from .forms import AddProductForm, AddCategoryForm, EditProductForm
@@ -23,7 +23,27 @@ def is_manager(user):
 @login_required
 def products(request):
     products = Product.objects.all()
-    context = {'title':'Products' ,'products':products}
+    categories = Category.objects.all()
+
+    category_id = request.GET.get('category')
+    sort = request.GET.get('sort')
+
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    if sort == 'newest':
+        products = products.order_by('-date_created')
+    elif sort == 'oldest':
+        products = products.order_by('date_created')
+    elif sort == 'price_high':
+        products = products.order_by('-price')
+    elif sort == 'price_low':
+        products = products.order_by('price')
+    elif sort == 'name_asc':
+        products = products.order_by('title')
+    elif sort == 'name_desc':
+        products = products.order_by('-title')
+    context = {'title':'Products' ,'products':products, 'categories': categories}
     return render(request, 'products.html', context)
 
 
@@ -54,16 +74,27 @@ def delete_product(request, id):
 @login_required
 def edit_product(request, id):
     product = get_object_or_404(Product, id=id)
+    
     if request.method == 'POST':
         form = EditProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            old_price = Product.objects.get(id=product.id).price  
+            updated_product = form.save(commit=False)
+            if old_price != updated_product.price:
+                print(f"Старая цена: {old_price}, новая цена: {updated_product.price}")
+                updated_product.save()  # сначала сохраняем
+                check_price_tracking_for_product(updated_product.id)
+            else:
+                updated_product.save()
+
             messages.success(request, 'Product has been updated', 'success')
             return redirect('dashboard:products')
     else:
         form = EditProductForm(instance=product)
-    context = {'title': 'Edit Product', 'form':form}
+
+    context = {'title': 'Edit Product', 'form': form}
     return render(request, 'edit_product.html', context)
+
 
 
 @user_passes_test(is_manager)

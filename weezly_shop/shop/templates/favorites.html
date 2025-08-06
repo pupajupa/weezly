@@ -1,28 +1,284 @@
-{% extends 'base.html' %}
-{% block content %}
-{% if products %}
-<h2>Your Favorites</h2>
-<hr>
-{% for product in products %}
-<div class="card me-2 mb-2" style="width: 16rem;">
-  <img style="object-fit: cover;" class="card-img mt-2" width="268" height="200" src="{{ product.image.url }}">
-  <div class="mt-3 text-center">
-    <h5 class="card-title">{{ product.title }}</h5>
-    <p class="text-muted">${{ product.price }}</p>
-    <a href="{{ product.get_absolute_url }}" class="mb-3 btn btn-primary w-100">Buy Now</a>
-  </div>
-  <a href="{% url 'shop:remove_from_favorites' product.id %}" class="mb-3 btn btn-outline-danger">Remove</a>
+{% extends 'base.html' %} {% block content %}
+
+<div class="favorites-page py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header mb-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="fw-bold mb-0">Your Collection</h1>
+                    <p class="text-muted mt-2">Manage your favorite and tracked products</p>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-lg-end mt-3 mt-lg-0">
+                    <a href="{% url 'shop:shop_page' %}" class="btn btn-outline-primary"> <i class="bi bi-plus-lg me-2"></i>Add More Products </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation mb-4">
+            <ul class="nav nav-tabs nav-tabs-modern" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link active d-flex align-items-center"
+                        id="favorites-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#favorites"
+                        type="button"
+                        role="tab"
+                        aria-controls="favorites"
+                        aria-selected="true"
+                    >
+                        <i class="bi bi-heart-fill me-2"></i>
+                        <span>Favorites</span>
+                        <span class="badge bg-primary rounded-pill ms-2">{{ products|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link d-flex align-items-center"
+                        id="tracked-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#tracked"
+                        type="button"
+                        role="tab"
+                        aria-controls="tracked"
+                        aria-selected="false"
+                    >
+                        <i class="bi bi-graph-up me-2"></i>
+                        <span>Tracked Products</span>
+                        <span class="badge bg-primary rounded-pill ms-2">{{ price_trackings|length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Favorites Tab -->
+            <div class="tab-pane fade show active" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
+                {% if products %}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    {% for product in products %}
+                    <div class="col">
+                        <div class="product-card card h-100 border-0 shadow-sm">
+                            <div class="position-relative">
+                                <div class="card-img-container bg-light p-4 text-center">
+                                    <a href="{{ product.get_absolute_url }}">
+                                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                                    </a>
+                                </div>
+                                <div class="favorite-badge position-absolute top-0 end-0 m-3">
+                                    <a
+                                        href="{% url 'shop:remove_from_favorites' product.id %}"
+                                        class="btn btn-sm btn-light rounded-circle shadow-sm"
+                                        title="Remove from favorites"
+                                    >
+                                        <i class="bi bi-heart-fill text-danger"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title">
+                                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                                </h5>
+                                <p class="product-price fw-bold mb-0">${{ product.price }}</p>
+                            </div>
+                            <div class="card-footer bg-white border-0 p-4 pt-0">
+                                <div class="d-grid gap-2">
+                                    <a href="{{ product.get_absolute_url }}" class="btn btn-primary"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                                    <a href="{% url 'shop:remove_from_favorites' product.id %}" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash me-2"></i>Remove
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-state-icon mb-4">
+                        <i class="bi bi-heart" style="font-size: 4rem; color: #dee2e6"></i>
+                    </div>
+                    <h3>No Favorites Yet</h3>
+                    <p class="text-muted mb-4">You haven't added any products to your favorites yet.</p>
+                    <a href="{% url 'shop:shop_page' %}" class="btn btn-primary"> <i class="bi bi-shop me-2"></i>Browse Products </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tracked Products Tab -->
+            <div class="tab-pane fade" id="tracked" role="tabpanel" aria-labelledby="tracked-tab">
+                {% if price_trackings %}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    {% for tracking in price_trackings %}
+                    <div class="col">
+                        <div class="product-card card h-100 border-0 shadow-sm">
+                            <div class="position-relative">
+                                <div class="card-img-container bg-light p-4 text-center">
+                                    <a href="{{ tracking.product.get_absolute_url }}">
+                                        <img
+                                            src="{{ tracking.product.image.url }}"
+                                            class="card-img-top"
+                                            alt="{{ tracking.product.title }}"
+                                            style="height: 180px; object-fit: contain"
+                                        />
+                                    </a>
+                                </div>
+                                <div class="tracking-badge position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-info"> <i class="bi bi-bell-fill me-1"></i>Tracking </span>
+                                </div>
+                            </div>
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title">
+                                    <a href="{{ tracking.product.get_absolute_url }}" class="text-decoration-none text-dark product-title"
+                                        >{{ tracking.product.title }}</a
+                                    >
+                                </h5>
+
+                                <div class="price-tracking-info mt-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Current:</span>
+                                        <span class="fw-bold">${{ tracking.product.price }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Target:</span>
+                                        <span class="fw-bold text-success">${{ tracking.desired_price }}</span>
+                                    </div>
+
+                                    <!-- Progress bar showing how close current price is to desired price -->
+                                    {% if tracking.product.price > tracking.desired_price %}
+                                    <div class="progress" style="height: 8px">
+                                        <div
+                                            class="progress-bar bg-info"
+                                            role="progressbar"
+                                            style="width: {{ tracking.desired_price|floatformat:0|default:0 }}%;"
+                                            aria-valuenow="{{ tracking.desired_price|floatformat:0|default:0 }}"
+                                            aria-valuemin="0"
+                                            aria-valuemax="{{ tracking.product.price|floatformat:0|default:100 }}"
+                                        ></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <small class="text-muted">Target</small>
+                                        <small class="text-muted">Current</small>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-success py-2 mt-2"><i class="bi bi-check-circle-fill me-2"></i>Target price reached!</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 p-4 pt-0">
+                                <div class="d-grid gap-2">
+                                    <a href="{{ tracking.product.get_absolute_url }}" class="btn btn-primary"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                                    <a href="{% url 'shop:cancel_price_tracking' tracking.product.id %}" class="btn btn-outline-danger">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel Tracking
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-state-icon mb-4">
+                        <i class="bi bi-graph-up" style="font-size: 4rem; color: #dee2e6"></i>
+                    </div>
+                    <h3>No Tracked Products</h3>
+                    <p class="text-muted mb-4">You're not tracking any product prices yet.</p>
+                    <a href="{% url 'shop:shop_page' %}" class="btn btn-primary"> <i class="bi bi-shop me-2"></i>Browse Products </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-{% endfor %}
-{% else %}
-<div class="row">
-  <div class="col-md-2"></div>
-  <div class="col-md-8 mt-5 pt-5 text-center">
-    <br>
-    <h3 class="text-muted text-capitalize">favorites list is empty..!</h3>
-    <a href="/" class="text-primary text-decoration-none">Back</a>
-  </div>
-  <div class="col-md-2"></div>
-</div>
-{% endif %}
+
+<style>
+    /* Modern Tab Styling */
+    .nav-tabs-modern {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .nav-tabs-modern .nav-link {
+        border: none;
+        color: #6c757d;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs-modern .nav-link:hover {
+        color: #495057;
+        background-color: transparent;
+    }
+
+    .nav-tabs-modern .nav-link.active {
+        color: var(--bs-primary);
+        background-color: transparent;
+    }
+
+    .nav-tabs-modern .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: transparent;
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs-modern .nav-link.active::after {
+        background-color: var(--bs-primary);
+    }
+
+    /* Product Card Styling */
+    .product-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .product-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 48px;
+    }
+
+    .card-img-container {
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Social Link */
+    .social-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 3rem;
+    }
+</style>
+
 {% endblock %}

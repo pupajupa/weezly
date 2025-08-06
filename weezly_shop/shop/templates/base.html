@@ -1,93 +1,402 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- google fonts -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-    <!-- bootstrap css cdn -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <title>{% if title %} {{ title }} {% else %} Weezly {% endif %}</title>
-</head>
-<body>
-  <header class="p-2 border-bottom">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <!-- cart icon -->
-        {% if request.user.is_authenticated %}
-        <b class="text-primary">{{ cart_count }}</b>
-        {% endif %}
-        <a href="{% url 'cart:show_cart' %}" class="text-primary mt-2 me-2"><i class="material-icons h3">&#xe8cc;</i></a>
-        <!-- favorite icon -->
-        {% if request.user.is_authenticated %}
-        <b class="text-primary">{{ request.user.get_likes_count}}</b>
-        {% endif %}
-        <a href="{% url 'shop:favorites' %}" class="text-primary mt-2 me-2"><i class="material-icons h3">&#xe87d;</i></a>
-        <!-- Menu -->
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="{% url 'shop:home_page' %}" class="nav-link px-2 text-dark">Home</a></li>
-          <li><a href="{% url 'shop:shop_page' %}" class="nav-link px-2 text-dark">Shop</a></li>
-          <!-- categories dropdown -->
-          <div class="dropdown text-end">
-            <a href="#" class=" mt-2 me-1 ms-1 text-dark d-block link-dark text-decoration-none dropdown-toggle"id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdownUser1">
-              {% for category in categories %}
-              <!-- check if category is parent -->
-                {% if not category.is_sub %}
-                  <!-- parent -->
-                  <li><a href="{% url 'shop:filter_by_category' category.slug %}" class="dropdown-item text-capitalize bg-light border"><b>{{ category }}</b></a></li>
-                  {% for child in category.sub_categories.all %}
-                   <!-- child -->
-                   <li><a href="{% url 'shop:filter_by_category' child.slug %}" class="dropdown-item">{{ child }}</a></li>
-                  {% endfor %}
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <!-- Bootstrap CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <!-- Bootstrap Icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+        <!-- Custom CSS -->
+        <style>
+            :root {
+                --primary-color: #4f46e5;
+                --primary-hover: #4338ca;
+                --secondary-color: #f9fafb;
+                --text-color: #1f2937;
+                --text-muted: #6b7280;
+                --border-color: #e5e7eb;
+            }
+
+            body {
+                font-family: "Inter", sans-serif;
+                color: var(--text-color);
+                background-color: #ffffff;
+            }
+
+            .navbar {
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .navbar-brand {
+                font-weight: 700;
+                font-size: 1.5rem;
+                color: var(--primary-color);
+            }
+
+            .nav-link {
+                font-weight: 500;
+                color: var(--text-color) !important;
+                padding: 0.5rem 1rem;
+                transition: all 0.2s ease;
+            }
+
+            .nav-link:hover {
+                color: var(--primary-color) !important;
+            }
+
+            .nav-link.active {
+                color: var(--primary-color) !important;
+                font-weight: 600;
+            }
+
+            .btn-primary {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .btn-primary:hover {
+                background-color: var(--primary-hover);
+                border-color: var(--primary-hover);
+            }
+
+            .btn-outline-primary {
+                color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .btn-outline-primary:hover {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .search-form {
+                position: relative;
+            }
+
+            .search-form .form-control {
+                padding-left: 2.5rem;
+                border-radius: 20px;
+                background-color: var(--secondary-color);
+                border: 1px solid var(--border-color);
+            }
+
+            .search-form .search-icon {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-muted);
+            }
+
+            .cart-icon,
+            .favorite-icon {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: var(--secondary-color);
+                color: var(--text-color);
+                transition: all 0.2s ease;
+            }
+
+            .cart-icon:hover,
+            .favorite-icon:hover {
+                background-color: var(--border-color);
+                color: var(--primary-color);
+            }
+
+            .badge-counter {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                font-size: 0.7rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 50%;
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .dropdown-menu {
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                border: 1px solid var(--border-color);
+                padding: 0.5rem;
+            }
+
+            .dropdown-item {
+                border-radius: 0.3rem;
+                padding: 0.5rem 1rem;
+                font-weight: 500;
+            }
+
+            .dropdown-item:hover {
+                background-color: var(--secondary-color);
+            }
+
+            .dropdown-item.active,
+            .dropdown-item:active {
+                background-color: var(--primary-color);
+            }
+
+            .alert {
+                border-radius: 0.5rem;
+                border: none;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            .footer {
+                background-color: var(--secondary-color);
+                padding: 2rem 0;
+                margin-top: 3rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            /* Animation for dropdown menus */
+            .dropdown-menu {
+                animation: fadeIn 0.2s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Mobile menu */
+            @media (max-width: 991.98px) {
+                .navbar-collapse {
+                    background-color: white;
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    margin-top: 0.5rem;
+                }
+            }
+        </style>
+        <title>{% if title %} {{ title }} {% else %} Weezly {% endif %}</title>
+    </head>
+    <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top py-3">
+            <div class="container">
+                <!-- Brand -->
+                <a class="navbar-brand" href="{% url 'shop:home_page' %}"> Weezly </a>
+
+                <!-- Mobile Toggle Button -->
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent"
+                    aria-controls="navbarContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navbar Content -->
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <!-- Main Navigation -->
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'shop:home_page' %}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'shop' in request.path %}active{% endif %}" href="{% url 'shop:shop_page' %}">Shop</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Categories
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                                {% for category in categories %} {% if not category.is_sub %}
+                                <li>
+                                    <a class="dropdown-item fw-bold" href="{% url 'shop:filter_by_category' category.slug %}"> {{ category }} </a>
+                                </li>
+                                {% for child in category.sub_categories.all %}
+                                <li>
+                                    <a class="dropdown-item ps-4" href="{% url 'shop:filter_by_category' child.slug %}"> {{ child }} </a>
+                                </li>
+                                {% endfor %} {% if not forloop.last %}
+                                <li><hr class="dropdown-divider" /></li>
+                                {% endif %} {% endif %} {% endfor %}
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'faq' in request.path %}active{% endif %}" href="{% url 'shop:faq_page' %}">FAQs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'about' in request.path %}active{% endif %}" href="{% url 'shop:about_page' %}">About</a>
+                        </li>
+                    </ul>
+
+                    <!-- Search Form -->
+                    <form class="search-form d-flex me-2 mb-3 mb-lg-0" action="{% url 'shop:search' %}">
+                        <span class="search-icon">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input name="q" type="search" class="form-control" placeholder="Search products..." aria-label="Search" />
+                    </form>
+
+                    <!-- Right Side Icons and User Menu -->
+                    <div class="d-flex align-items-center ms-lg-3 mt-3 mt-lg-0">
+                        <!-- Cart Icon -->
+                        <a href="{% url 'cart:show_cart' %}" class="cart-icon me-2">
+                            <i class="bi bi-cart"></i>
+                            {% if request.user.is_authenticated and cart_count > 0 %}
+                            <span class="badge-counter">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+
+                        <!-- Favorites Icon -->
+                        <a href="{% url 'shop:favorites' %}" class="favorite-icon me-3">
+                            <i class="bi bi-heart"></i>
+                            {% if request.user.is_authenticated and request.user.get_likes_count > 0 %}
+                            <span class="badge-counter">{{ request.user.get_likes_count }}</span>
+                            {% endif %}
+                        </a>
+
+                        <!-- User Menu -->
+                        {% if request.user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                Profile
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'cart:show_cart' %}"> <i class="bi bi-cart me-2"></i>My Cart </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'shop:favorites' %}"> <i class="bi bi-heart me-2"></i>My Favorites </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'orders:user_orders' %}"> <i class="bi bi-box me-2"></i>My Orders </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accounts:edit_profile' %}"> <i class="bi bi-gear me-2"></i>Edit Profile </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'accounts:user_logout' %}"> <i class="bi bi-box-arrow-right me-2"></i>Sign out </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <div class="d-flex">
+                            <a href="{% url 'accounts:user_login' %}" class="btn btn-outline-primary me-2">Login</a>
+                            <a href="{% url 'accounts:user_register' %}" class="btn btn-primary">Sign-up</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="py-4">
+            <div class="container">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-              {% endfor %}
-            </ul>
-          </div>
-          <li><a href="{% url 'shop:faq_page' %}" class="nav-link px-2 text-dark">FAQs</a></li>
-          <li><a href="#" class="nav-link px-2 text-dark">About</a></li>
-        </ul>
-        <!-- search form -->
-        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'shop:search' %}">
-          <input name="q" type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
-        </form>
-        {% if request.user.is_authenticated %}
-        <!-- user profile dropdown -->
-        <div class="dropdown text-end">
-          <a href="#" class="btn btn-primary text-white me-4 d-block link-dark text-decoration-none dropdown-toggle"id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
-          <ul class="dropdown-menu" aria-labelledby="dropdownUser1">
-            <li><a href="{% url 'cart:show_cart' %}" <a class="dropdown-item">Cart</a></li>
-            <li><a href="{% url 'shop:favorites' %}" <a class="dropdown-item">Favorites</a></li>
-            <li><a href="{% url 'orders:user_orders' %}" <a class="dropdown-item">Orders</a></li>
-            <li><a class="dropdown-item" href="{% url 'accounts:edit_profile' %}">Edit Profile</a></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'accounts:user_logout' %}">Sign out</a></li>
-          </ul>
-        </div>
-        {% else %}
-        <!-- login, sign-up btn -->
-        <div class="text-end">
-          <a href="{% url 'accounts:user_login' %}" class="btn btn-outline-primary me-2">Login</a>
-          <a href="{% url 'accounts:user_register' %}" class="btn btn-primary">Sign-up</a>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-  </header>
-    <main class="container">
-        <div class="row mt-3">
-          <!-- messages -->
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-          <!-- content -->
-          {% block content %}{% endblock %}
-        </div>
-      </main>
-    <!-- Bootstrap JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-</body>
+
+                <!-- Content -->
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 mb-4 mb-lg-0">
+                        <h5 class="fw-bold mb-3">Weezly</h5>
+                        <p class="text-muted">Your one-stop shop for all your needs. Quality products at affordable prices.</p>
+                        <div class="social-icons mt-3">
+                            <a href="#" class="me-2 text-muted"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="me-2 text-muted"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="me-2 text-muted"><i class="bi bi-instagram"></i></a>
+                            <a href="#" class="me-2 text-muted"><i class="bi bi-linkedin"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                        <h6 class="fw-bold mb-3">Shop</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="{% url 'shop:shop_page' %}" class="text-decoration-none text-muted">All Products</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">New Arrivals</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Best Sellers</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Deals & Offers</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                        <h6 class="fw-bold mb-3">Support</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="{% url 'shop:faq_page' %}" class="text-decoration-none text-muted">FAQs</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Contact Us</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Shipping Info</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Returns Policy</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <h6 class="fw-bold mb-3">Newsletter</h6>
+                        <p class="text-muted">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+                        <form class="mt-3">
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email" aria-label="Your email" />
+                                <button class="btn btn-primary" type="button">Subscribe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0 text-muted">&copy; {% now "Y" %} Weezly. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                        <img src="{% static 'images/pay-bank.png' %}" alt="Bank" class="payment-icon" />
+                        <img src="{% static 'images/pay-mastercard.png' %}" alt="Mastercard" class="payment-icon" />
+                        <img src="{% static 'images/pay-visa.png' %}" alt="Visa" class="payment-icon" />
+                        <img src="{% static 'images/pay-visa-el.png' %}" alt="Visa Electron" class="payment-icon" />
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Bootstrap JavaScript Bundle with Popper -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+    </body>
 </html>

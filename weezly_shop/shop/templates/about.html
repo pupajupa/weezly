@@ -1,0 +1,434 @@
+{% extends 'base.html' %} {% load static%} {% block content %}
+
+<!-- Hero Section -->
+<section class="about-hero position-relative mb-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-3">About Weezly</h1>
+                <p class="lead mb-4">We're on a mission to provide quality products at affordable prices with exceptional customer service.</p>
+                <div class="d-flex align-items-center">
+                    <div class="me-4">
+                        <div class="fw-bold fs-3 text-primary mb-1">5+</div>
+                        <div class="text-muted">Years of Experience</div>
+                    </div>
+                    <div class="me-4">
+                        <div class="fw-bold fs-3 text-primary mb-1">10k+</div>
+                        <div class="text-muted">Happy Customers</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-3 text-primary mb-1">99%</div>
+                        <div class="text-muted">Satisfaction Rate</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="about-image-container position-relative">
+                    <img src="{% static "images/weezly.jpg" %}" alt="Weezly Store" class="img-fluid rounded-4 shadow" />
+                    <div class="position-absolute top-0 start-0 translate-middle bg-primary rounded-circle p-3 shadow-lg">
+                        <i class="bi bi-check2-circle text-white fs-3"></i>
+                    </div>
+                    <div class="position-absolute bottom-0 end-0 translate-middle bg-white rounded-4 p-3 shadow-lg">
+                        <div class="text-center">
+                            <div class="fw-bold text-primary">Since</div>
+                            <div class="fs-3 fw-bold">2018</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story Section -->
+<section class="our-story py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="position-relative">
+                    <img src="{% static 'images/story.avif' %}" alt="Our Story" class="img-fluid rounded-4 shadow" />
+                    <div class="position-absolute top-50 start-100 translate-middle bg-white rounded-4 p-4 shadow-lg" style="max-width: 200px">
+                        <div class="text-center">
+                            <i class="bi bi-quote fs-1 text-primary opacity-25"></i>
+                            <p class="mb-0 fst-italic">Quality is not an act, it's a habit.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="ps-lg-4">
+                    <h6 class="text-uppercase text-primary fw-bold mb-2">Our Story</h6>
+                    <h2 class="fw-bold mb-4">How Weezly Started and Evolved</h2>
+                    <p class="mb-4">
+                        Weezly began as a small electronics shop in 2018, founded by tech enthusiasts who wanted to make quality electronics accessible to everyone. What
+                        started as a passion project quickly grew into a trusted online destination for tech lovers.
+                    </p>
+                    <p>
+                        Our journey has been defined by our commitment to customer satisfaction, product quality, and staying ahead of technological trends. Today, we're
+                        proud to serve thousands of customers worldwide, offering a curated selection of electronics and accessories that enhance everyday life.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Values Section -->
+<section class="mission-values py-5 mb-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase text-primary fw-bold mb-2">Why Choose Us</h6>
+            <h2 class="fw-bold mb-4">Our Mission & Values</h2>
+            <p class="lead mx-auto" style="max-width: 700px">
+                We're guided by a simple mission: to provide high-quality electronics that enhance your daily life, backed by exceptional service and support.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="value-icon mb-3">
+                            <div class="icon-circle bg-primary bg-opacity-10 mx-auto">
+                                <i class="bi bi-star text-primary fs-3"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title mb-3">Quality</h4>
+                        <p class="card-text text-muted">
+                            We carefully select each product in our inventory, ensuring it meets our high standards for performance, durability, and value.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="value-icon mb-3">
+                            <div class="icon-circle bg-primary bg-opacity-10 mx-auto">
+                                <i class="bi bi-people text-primary fs-3"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title mb-3">Customer Focus</h4>
+                        <p class="card-text text-muted">
+                            Our customers are at the heart of everything we do. We're committed to providing an exceptional shopping experience from browsing to delivery.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <div class="value-icon mb-3">
+                            <div class="icon-circle bg-primary bg-opacity-10 mx-auto">
+                                <i class="bi bi-lightning-charge text-primary fs-3"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title mb-3">Innovation</h4>
+                        <p class="card-text text-muted">
+                            We stay ahead of trends and continuously update our product selection to offer the latest innovations in technology and electronics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="team-section py-5 mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase text-primary fw-bold mb-2">Meet Our Team</h6>
+            <h2 class="fw-bold mb-4">The People Behind Weezly</h2>
+            <p class="lead mx-auto" style="max-width: 700px">
+                Our diverse team of experts is passionate about technology and dedicated to providing you with the best shopping experience.
+            </p>
+        </div>
+
+        <div class="col-md-6 col-lg-12">
+            <div class="team-member text-center my-4">
+                <div class="member-image position-relative mb-3 mx-auto" style="max-width: 300px">
+                    <img
+                        src="{% static 'images/team_member.jpg' %}"
+                        alt="Team Member"
+                        class="img-fluid rounded-circle shadow w-100"
+                        style="width: 100%; height: 100%; object-fit: cover"
+                    />
+                    <div class="social-links position-absolute start-50 bottom-0 translate-middle-x mb-2">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="https://t.me/kksusshkaa" class="social-link bg-white rounded-circle shadow-sm">
+                                <i class="bi bi-telegram text-primary"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="mb-1">Kseniya Kozhemiakina</h5>
+                <p class="text-muted mb-0">Founder & CEO</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Milestones Section -->
+<section class="milestones-section py-5 mb-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase text-primary fw-bold mb-2">Our Journey</h6>
+            <h2 class="fw-bold mb-4">Key Milestones</h2>
+        </div>
+
+        <div class="timeline position-relative">
+            <div class="row g-0">
+                <div class="col-md-6">
+                    <div class="timeline-item right">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm ms-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2018</span>
+                                </div>
+                                <h5 class="mb-0">Weezly Founded</h5>
+                            </div>
+                            <p class="text-muted mb-0">Started as a small electronics shop with a focus on quality products and customer service.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="timeline-item left">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm me-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2019</span>
+                                </div>
+                                <h5 class="mb-0">Online Store Launch</h5>
+                            </div>
+                            <p class="text-muted mb-0">Expanded to e-commerce, bringing our products to customers nationwide.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="timeline-item right">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm ms-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2020</span>
+                                </div>
+                                <h5 class="mb-0">Product Range Expansion</h5>
+                            </div>
+                            <p class="text-muted mb-0">Doubled our product catalog to include a wider range of electronics and accessories.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="timeline-item left">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm me-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2021</span>
+                                </div>
+                                <h5 class="mb-0">International Shipping</h5>
+                            </div>
+                            <p class="text-muted mb-0">Started shipping to international customers, expanding our global presence.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="timeline-item right">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm ms-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2022</span>
+                                </div>
+                                <h5 class="mb-0">Customer Milestone</h5>
+                            </div>
+                            <p class="text-muted mb-0">Celebrated serving our 10,000th customer and maintained a 99% satisfaction rate.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="timeline-item left">
+                        <div class="timeline-content p-4 bg-white rounded-4 shadow-sm me-md-4 mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="timeline-year me-3">
+                                    <span class="badge bg-primary px-3 py-2 rounded-pill">2023</span>
+                                </div>
+                                <h5 class="mb-0">Website Redesign</h5>
+                            </div>
+                            <p class="text-muted mb-0">Launched our new website with enhanced features for a better shopping experience.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact-section py-5 mb-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8 col-xl-6 mb-4">
+                <h6 class="text-uppercase text-primary fw-bold mb-2">Get In Touch</h6>
+                <h2 class="fw-bold mb-4">Contact Us</h2>
+                <p class="mb-4">Have questions or feedback? We'd love to hear from you. Our team is always ready to assist you with any inquiries.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-6">
+                <div class="contact-info bg-white p-4 rounded-4 shadow-sm">
+                    <!-- Keep horizontal layout but center the whole container -->
+                    <div class="d-flex flex-column gap-4">
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon me-3">
+                                <div class="icon-circle bg-primary bg-opacity-10">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Address</h6>
+                                <p class="text-muted mb-0">Lenina 10, Minsk, CA 94103</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon me-3">
+                                <div class="icon-circle bg-primary bg-opacity-10">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Email</h6>
+                                <p class="text-muted mb-0">support@weezly.com</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon me-3">
+                                <div class="icon-circle bg-primary bg-opacity-10">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Phone</h6>
+                                <p class="text-muted mb-0">+375 (33) 333-33-33</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="contact-icon me-3">
+                                <div class="icon-circle bg-primary bg-opacity-10">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Working Hours</h6>
+                                <p class="text-muted mb-0">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                            </div>
+                        </div>
+                        <!-- Repeat for other contact items -->
+                        <!-- ... -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section mb-5">
+    <div class="container">
+        <div class="map-container rounded-4 overflow-hidden shadow-sm">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4701.489651354051!2d27.555816912891267!3d53.90073927234045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46dbcfc1ede858fb%3A0x517257bc7c6a89b9!2z0YPQu9C40YbQsCDQm9C10L3QuNC90LAgMTAsINCc0LjQvdGB0LosINCc0LjQvdGB0LrQsNGPINC-0LHQu9Cw0YHRgtGMLCDQkdC10LvQsNGA0YPRgdGM!5e0!3m2!1sru!2sfr!4v1746066143318!5m2!1sru!2sfr"
+                width="100%"
+                height="400"
+                style="border: 0"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Icon Circles */
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Social Links */
+    .social-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Team Member */
+    .team-member {
+        transition: all 0.3s ease;
+    }
+
+    .team-member:hover {
+        transform: translateY(-5px);
+    }
+
+    .social-links {
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .member-image:hover .social-links {
+        opacity: 1;
+    }
+
+    /* Timeline */
+    .timeline {
+        padding: 20px 0;
+    }
+
+    .timeline-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 2px;
+        background-color: #e9ecef;
+        transform: translateX(-50%);
+    }
+
+    @media (max-width: 767.98px) {
+        .timeline-line {
+            left: 20px;
+        }
+    }
+
+    /* Contact Icons */
+    .contact-icon .icon-circle {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Testimonial Cards */
+    .testimonial-card {
+        transition: all 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+
+{% endblock %}

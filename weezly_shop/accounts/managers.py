@@ -6,7 +6,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('Email is required!')
         if not full_name:
-            raise ValueError('full name is required!')
+            raise ValueError('Full name is required!')
 
         user = self.model(email=self.normalize_email(email), full_name=full_name)
         user.set_password(password)

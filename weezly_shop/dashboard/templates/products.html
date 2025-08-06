@@ -1,32 +1,519 @@
-{% extends "dashboard.html" %}
+{% extends "dashboard.html" %} {% block content %}
+<!-- Header with actions -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="h4 mb-1">Products</h2>
+        <p class="text-muted mb-0">Manage your product inventory ({{ products|length }} items)</p>
+    </div>
 
-{% block content %}
+    <div class="d-flex flex-wrap gap-2">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control border-start-0 ps-0" id="searchProducts" placeholder="Search products..." />
+        </div>
+        <a href="{% url 'dashboard:add_product' %}" class="btn btn-primary d-flex align-items-center"> <i class="bi bi-plus-lg me-2"></i> Add Product </a>
+    </div>
+</div>
 
-<table class="table table-striped ">
-    <thead class="text-muted">
-        <tr>
-            <th scope="col">n</th>
-            <th scope="col">title</th>
-            <th scope="col">price</th>
-            <th scope="col">category</th>
-            <th scope="col">date</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    {% for product in products %}
-    <tbody>
-      <tr>
-        <th scope="row">{{ forloop.counter }}</th>
-        <td><a class="text-decoration-none" href="{{ product.get_absolute_url }}">{{ product.title }}</a></td>
-        <td>${{ product.price }}</td>
-        <td>{{ product.category }}</td>
-        <td>{{ product.date_created|date:"M d" }}</td>
-        <td><a class="text-danger text-decoration-none" href="{% url 'dashboard:delete_product' product.id %}">Delete</a></td>
-        <td><a class="text-info text-decoration-none" href="{% url 'dashboard:edit_product' product.id %}">Edit</a></td>
-      </tr>
-    </tbody>
-    {% endfor %}
-</table>
+<!-- Filters -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <select class="form-select" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <!-- Assuming you have categories available -->
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" id="sortFilter">
+                  <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>Newest First</option>
+                  <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>Oldest First</option>
+                  <option value="price_high" {% if request.GET.sort == "price_high" %}selected{% endif %}>Price: High to Low</option>
+                  <option value="price_low" {% if request.GET.sort == "price_low" %}selected{% endif %}>Price: Low to High</option>
+                  <option value="name_asc" {% if request.GET.sort == "name_asc" %}selected{% endif %}>Name: A to Z</option>
+                  <option value="name_desc" {% if request.GET.sort == "name_desc" %}selected{% endif %}>Name: Z to A</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" id="tableViewBtn"><i class="bi bi-table me-1"></i> Table</button>
+                    <button type="button" class="btn btn-outline-secondary" id="gridViewBtn"><i class="bi bi-grid-3x3-gap me-1"></i> Grid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Table View -->
+<div id="tableView" class="card shadow-sm mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 60px">
+                        <div class="form-check">
+                            <label class="form-check-label" for="selectAllProducts"><span class="visually-hidden">Select All</span></label>
+                        </div>
+                    </th>
+                    <th scope="col" style="width: 80px">Image</th>
+                    <th scope="col">Product</th>
+                    <th scope="col">Category</th>
+                    <th scope="col" class="text-end">Price</th>
+                    <th scope="col" class="text-center">Date Added</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <div class="form-check">
+                            <label class="form-check-label" for="product-{{ product.id }}"><span class="visually-hidden">Select product</span></label>
+                        </div>
+                    </td>
+                    <td>
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}" class="img-thumbnail" width="50" height="50" style="object-fit: cover" />
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px">
+                            <i class="bi bi-image text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none fw-medium text-truncate" style="max-width: 200px">{{ product.title }}</a>
+                            <small class="text-muted">ID: #{{ product.id }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border">{{ product.category }}</span>
+                    </td>
+                    <td class="text-end fw-medium">${{ product.price }}</td>
+                    <td class="text-center">
+                        <div class="d-flex flex-column align-items-center">
+                            <span>{{ product.date_created|date:"M d" }}</span>
+                            <small class="text-muted">{{ product.date_created|date:"Y" }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'dashboard:edit_product' product.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{ product.id }}"
+                                title="Delete"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button
+                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    type="button"
+                                    id="dropdownMenuButton{{ product.id }}"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ product.id }}">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ product.get_absolute_url }}"><i class="bi bi-eye me-2"></i>View</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#"><i class="bi bi-files me-2"></i>Duplicate</a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}"
+                                            ><i class="bi bi-trash me-2"></i>Delete</a
+                                        >
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    {% if not products %}
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-box text-muted" style="font-size: 3rem"></i>
+        </div>
+        <h5>No Products Found</h5>
+        <p class="text-muted">You haven't added any products yet.</p>
+        <a href="{% url 'dashboard:add_product' %}" class="btn btn-primary"> <i class="bi bi-plus-lg me-2"></i>Add Your First Product </a>
+    </div>
+    {% endif %}
+
+    <!-- Bulk Actions Footer -->
+    <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <nav aria-label="Product pagination" class="ms-auto">
+            <ul class="pagination pagination-sm mb-0">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %} {% for i in products.paginator.page_range %} {% if products.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %} {% endfor %} {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Grid View (Hidden by default) -->
+<div id="gridView" class="card shadow-sm mb-4 d-none">
+    <div class="card-body">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+            {% for product in products %}
+            <div class="col">
+                <div class="card h-100 product-card border-0 shadow-sm">
+                    <div class="position-relative">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top p-3" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center p-3" style="height: 180px">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem"></i>
+                        </div>
+                        {% endif %}
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <div class="form-check">
+                                <label class="form-check-label" for="grid-product-{{ product.id }}"><span class="visually-hidden">Select product</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ product.title }}</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-light text-dark border">{{ product.category }}</span>
+                            <small class="text-muted">{{ product.date_created|date:"M d, Y" }}</small>
+                        </div>
+                        <p class="card-text fw-bold">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard:edit_product' product.id %}" class="btn btn-sm btn-outline-primary"> <i class="bi bi-pencil me-1"></i> Edit </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State for Grid View -->
+        {% if not products %}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="bi bi-box text-muted" style="font-size: 3rem"></i>
+            </div>
+            <h5>No Products Found</h5>
+            <p class="text-muted">You haven't added any products yet.</p>
+            <a href="{% url 'dashboard:add_product' %}" class="btn btn-primary"> <i class="bi bi-plus-lg me-2"></i>Add Your First Product </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Grid View Pagination -->
+    <div class="card-footer bg-white p-3 d-flex justify-content-between align-items-center">
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <nav aria-label="Product pagination" class="ms-auto">
+            <ul class="pagination pagination-sm mb-0">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %} {% for i in products.paginator.page_range %} {% if products.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %} {% endfor %} {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Modals -->
+{% for product in products %}
+<div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ product.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ product.id }}">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem"></i>
+                </div>
+                <p class="text-center">Are you sure you want to delete <strong>{{ product.title }}</strong>?</p>
+                <p class="text-center text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'dashboard:delete_product' product.id %}" class="btn btn-danger">Delete Product</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- JavaScript for functionality -->
+<script>
+    document.getElementById("categoryFilter").addEventListener("change", function () {
+        updateFilters();
+    });
+
+    document.getElementById("sortFilter").addEventListener("change", function () {
+        updateFilters();
+    });
+
+    function updateFilters() {
+        const category = document.getElementById("categoryFilter").value;
+        const sort = document.getElementById("sortFilter").value;
+
+        let params = new URLSearchParams(window.location.search);
+        if (category) {
+            params.set("category", category);
+        } else {
+            params.delete("category");
+        }
+
+        if (sort) {
+            params.set("sort", sort);
+        } else {
+            params.delete("sort");
+        }
+
+        window.location.search = params.toString();
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // View toggle functionality
+        const tableViewBtn = document.getElementById("tableViewBtn");
+        const gridViewBtn = document.getElementById("gridViewBtn");
+        const tableView = document.getElementById("tableView");
+        const gridView = document.getElementById("gridView");
+
+        tableViewBtn.addEventListener("click", function () {
+            tableView.classList.remove("d-none");
+            gridView.classList.add("d-none");
+            tableViewBtn.classList.add("active");
+            gridViewBtn.classList.remove("active");
+            localStorage.setItem("productViewPreference", "table");
+        });
+
+        gridViewBtn.addEventListener("click", function () {
+            gridView.classList.remove("d-none");
+            tableView.classList.add("d-none");
+            gridViewBtn.classList.add("active");
+            tableViewBtn.classList.remove("active");
+            localStorage.setItem("productViewPreference", "grid");
+        });
+
+        // Load user preference if available
+        const viewPreference = localStorage.getItem("productViewPreference");
+        if (viewPreference === "grid") {
+            gridViewBtn.click();
+        }
+
+        // Select all functionality for table view
+        const selectAllCheckbox = document.getElementById("selectAllProducts");
+        const productCheckboxes = document.querySelectorAll(".product-select");
+        const bulkActions = document.querySelector(".bulk-actions");
+        const selectedCount = document.getElementById("selectedCount");
+
+        selectAllCheckbox.addEventListener("change", function () {
+            const isChecked = this.checked;
+            productCheckboxes.forEach((checkbox) => {
+                checkbox.checked = isChecked;
+            });
+
+            updateBulkActionsVisibility();
+        });
+
+        productCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                updateBulkActionsVisibility();
+
+                // Update "select all" checkbox state
+                const allChecked = Array.from(productCheckboxes).every((cb) => cb.checked);
+                const someChecked = Array.from(productCheckboxes).some((cb) => cb.checked);
+
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            });
+        });
+
+        // Grid view selection
+        const productGridCheckboxes = document.querySelectorAll(".product-select-grid");
+        const bulkActionsGrid = document.querySelector(".bulk-actions-grid");
+        const selectedCountGrid = document.getElementById("selectedCountGrid");
+
+        productGridCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                updateGridBulkActionsVisibility();
+            });
+        });
+
+        function updateBulkActionsVisibility() {
+            const checkedBoxes = document.querySelectorAll(".product-select:checked");
+            if (checkedBoxes.length > 0) {
+                bulkActions.classList.remove("d-none");
+                selectedCount.textContent = checkedBoxes.length;
+            } else {
+                bulkActions.classList.add("d-none");
+            }
+        }
+
+        function updateGridBulkActionsVisibility() {
+            const checkedBoxes = document.querySelectorAll(".product-select-grid:checked");
+            if (checkedBoxes.length > 0) {
+                bulkActionsGrid.classList.remove("d-none");
+                selectedCountGrid.textContent = checkedBoxes.length;
+            } else {
+                bulkActionsGrid.classList.add("d-none");
+            }
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById("searchProducts");
+        searchInput.addEventListener("input", function () {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll("tbody tr");
+            const gridCards = document.querySelectorAll(".product-card");
+
+            // Filter table rows
+            tableRows.forEach((row) => {
+                const productTitle = row.querySelector("a").textContent.toLowerCase();
+                if (productTitle.includes(searchTerm)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Filter grid cards
+            gridCards.forEach((card) => {
+                const productTitle = card.querySelector(".card-title").textContent.toLowerCase();
+                const cardParent = card.closest(".col");
+                if (productTitle.includes(searchTerm)) {
+                    cardParent.style.display = "";
+                } else {
+                    cardParent.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Product card hover effect */
+    .product-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Table hover styles */
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    /* Custom checkbox styling */
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Pagination styling */
+    .page-link {
+        color: var(--primary-color);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Button hover effects */
+    .btn-outline-primary:hover {
+        background-color: rgba(79, 70, 229, 0.1);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+    }
+
+    /* Search input focus */
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+    }
+</style>
 {% endblock %}

@@ -1,96 +1,408 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% load static %}{% block content %}
 
-{% block content %}
-<div class="d-flex align-items-center justify-content-center vh-100">
-  <div class="container text-center">
-    <h1 class="mb-4" style="font-size: 3em;">
-      <span class="bounce" style="color: #FF5733;">W</span>
-      <span class="bounce" style="color: #33FF57;">e</span>
-      <span class="bounce" style="color: #3357FF;">e</span>
-      <span class="bounce" style="color: #FF33A6;">z</span>
-      <span class="bounce" style="color: #FFD700;">l</span>
-      <span class="bounce" style="color: #33FFF3;">y</span> 
-    </h1>
-    <p class="mb-4" style="font-size: 1.5em;">Discover the best products at unbeatable prices!</p>
-  
-    <!-- Featured Product Section -->
-    <h2 class="mb-4" style="font-size: 2em;">Product of the Week</h2>
-    <div id="product-carousel" class="position-relative">
-      <div class="d-flex overflow-hidden" style="width: 100%; justify-content: center;">
-        <div class="row flex-nowrap" id="carousel-inner" style="transition: transform 0.5s ease;">
-          {% for product in weekly_products %}
-          <div class="card me-2 mb-2" style="width: 16rem;">
-            <img class="card-img-top mt-2" style="object-fit: contain; width: 100%; height: 200px;" src="{{ product.image.url }}" alt="{{ product.title }}">
-            <div class="card-body text-center d-flex flex-column">
-              <h5 class="card-title">{{ product.title }}</h5>
-              <p class="text-muted">${{ product.price }}</p>
-              <a href="{{ product.get_absolute_url }}" class="mt-auto mb-3 btn btn-outline-primary w-100">Buy Now</a>
+<!-- Hero Section -->
+<section class="hero-section position-relative overflow-hidden mb-5">
+    <div class="hero-bg position-absolute top-0 start-0 w-100 h-100" style="background-color: #f8f9fa; z-index: -1"></div>
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">
+                    <span class="text-gradient">Welcome to Weezly</span>
+                </h1>
+                <p class="lead mb-4">Discover amazing products at unbeatable prices. Shop the latest trends and find your perfect match.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'shop:shop_page' %}" class="btn btn-primary btn-lg">Shop Now</a>
+                    <a href="#featured" class="btn btn-outline-secondary btn-lg">Explore</a>
+                </div>
             </div>
-          </div>
-          {% endfor %}
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="hero-image-container p-3 bg-white rounded-4 shadow-lg">
+                        <img src="{% static 'images/reklama.jpg' %}" alt="Featured Products" class="img-fluid rounded-3" />
+                    </div>
+                    <div class="position-absolute top-0 start-100 translate-middle badge-container">
+                        <div class="badge-circle bg-primary text-white shadow">
+                            <span class="fs-5 fw-bold">SALE</span>
+                            <span class="small d-block">OFF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<script>
-  let currentIndex = 0;
-  const items = document.querySelectorAll('#carousel-inner .card');
-  const totalItems = items.length;
+    <!-- Wave Divider -->
+    <div class="wave-divider">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120">
+            <path
+                fill="#ffffff"
+                fill-opacity="1"
+                d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"
+            ></path>
+        </svg>
+    </div>
+</section>
 
-  function updateCarousel() {
-    items.forEach((item, index) => {
-      item.style.display = index === currentIndex ? 'block' : 'none';
-    });
-  }
+<!-- Categories Section -->
+<section class="categories-section mb-5">
+    <div class="container">
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-6 col-md-3">
+                <a href="{% url 'shop:filter_by_category' category.slug %}" class="category-card text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="category-icon mb-3">
+                                <!-- Используй иконки в зависимости от категории -->
+                                {% if category.title == "Electronics" %}
+                                <i class="bi bi-laptop fs-1 text-primary"></i>
+                                {% elif category.title == "Accessories" %}
+                                <i class="bi bi-smartwatch fs-1 text-primary"></i>
+                                {% elif category.title == "Audio" %}
+                                <i class="bi bi-headphones fs-1 text-primary"></i>
+                                {% elif category.title == "Cameras" %}
+                                <i class="bi bi-camera fs-1 text-primary"></i>
+                                {% endif %}
+                            </div>
+                            <h5 class="card-title mb-0">{{ category.title }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-  function nextSlide() {
-    currentIndex = (currentIndex + 1) % totalItems;
-    updateCarousel();
-  }
+<!-- Popular Products Section -->
+<section id="featured" class="products-section mb-5 py-5">
+    <div class="container">
+        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="section-title fw-bold">Popular Products</h2>
+                <p class="text-muted">Popular among buyers</p>
+            </div>
+            <a href="{% url 'shop:shop_page' %}" class="btn btn-outline-primary">View All</a>
+        </div>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    updateCarousel();
-    setInterval(nextSlide, 3000); // Change every 5 seconds
-  });
-</script>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in popular_products %}
+            <div class="col">
+                <div class="product-card card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        <div class="card-img-container bg-light p-4 text-center">
+                            <a href="{{ product.get_absolute_url }}">
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                            </a>
+                        </div>
+                        <div class="product-badge position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-primary">Popular</span>
+                        </div>
+                        <div class="product-actions position-absolute bottom-0 start-50 translate-middle-x mb-3">
+                            <div class="d-flex gap-2">
+                                <a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-light rounded-circle" title="Quick view">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if user.is_authenticated and product in user.likes.all %}
+                                <a href="{% url 'shop:remove_from_favorites_home_page' product.id %}" class="btn btn-sm btn-light rounded-circle" title="Add to wishlist">
+                                    <i class="bi bi-heart-fill"></i>
+                                </a>
+                                {% else %}
+                                <a href="{% url 'shop:add_to_favorites_home_page' product.id %}" class="btn btn-sm btn-light rounded-circle" title="Add to Favorites">
+                                    <i class="bi bi-heart"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                        </h5>
+                        <p class="product-price fw-bold mb-0">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary w-100"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Discounted Products Section -->
+<section class="products-section mb-5 py-5 bg-light">
+    <div class="container">
+        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="section-title fw-bold">Price Drops</h2>
+                <p class="text-muted">Price reduction</p>
+            </div>
+            <a href="{% url 'shop:shop_page' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in discounted_products %}
+            <div class="col">
+                <div class="product-card card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        <div class="card-img-container bg-light p-4 text-center">
+                            <a href="{{ product.get_absolute_url }}">
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                            </a>
+                        </div>
+                        <div class="product-badge position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-danger">Sale</span>
+                        </div>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                        </h5>
+                        <div class="product-price mb-0">
+                            <span class="fw-bold text-danger">${{ product.price }}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary w-100"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Personal Recommendations Section -->
+<section class="products-section mb-5 py-5">
+    <div class="container">
+        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="section-title fw-bold">Just For You</h2>
+                <p class="text-muted">Personal recommendations</p>
+            </div>
+            <a href="{% url 'shop:shop_page' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in personal_recommendations %}
+            <div class="col">
+                <div class="product-card card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        <div class="card-img-container bg-light p-4 text-center">
+                            <a href="{{ product.get_absolute_url }}">
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                            </a>
+                        </div>
+                        <div class="product-badge position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-info">For You</span>
+                        </div>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                        </h5>
+                        <p class="product-price fw-bold mb-0">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary w-100"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Accessories Section -->
+<section class="products-section mb-5 py-5 bg-light">
+    <div class="container">
+        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 class="section-title fw-bold">Complete Your Order</h2>
+                <p class="text-muted">Accessories for your order</p>
+            </div>
+            <a href="{% url 'shop:shop_page' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in accessory_products %}
+            <div class="col">
+                <div class="product-card card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        <div class="card-img-container bg-light p-4 text-center">
+                            <a href="{{ product.get_absolute_url }}">
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: contain" />
+                            </a>
+                        </div>
+                        <div class="product-badge position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-secondary">Accessory</span>
+                        </div>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h5 class="card-title">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark product-title">{{ product.title }}</a>
+                        </h5>
+                        <p class="product-price fw-bold mb-0">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary w-100"> <i class="bi bi-cart-plus me-2"></i>Buy Now </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section mb-5 py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-truck fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="feature-title">Free Shipping</h5>
+                    <p class="feature-text text-muted small">On orders over $50</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-shield-check fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="feature-title">Secure Payment</h5>
+                    <p class="feature-text text-muted small">100% secure payment</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-arrow-counterclockwise fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="feature-title">Easy Returns</h5>
+                    <p class="feature-text text-muted small">30 day return policy</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-headset fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="feature-title">24/7 Support</h5>
+                    <p class="feature-text text-muted small">Dedicated support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <style>
-  @keyframes bounceAnimation {
-    0% { transform: translateY(0); }
-    5%, 100% { transform: translateY(10px); }
-    90% { transform: translateY(-40px); }
-  }
+    /* Hero Section */
+    .text-gradient {
+        background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-  .bounce {
-    display: inline-block;
-    animation: bounceAnimation 1.5s infinite;
-  }
+    .badge-circle {
+        width: 80px;
+        height: 80px;
+        margin-right: 24px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(15deg);
+    }
 
-  .bounce:nth-child(1) {
-    animation-delay: 0s;
-  }
+    /* Product Cards */
+    .product-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
 
-  .bounce:nth-child(2) {
-    animation-delay: 0.15s; /* Adjust the delay for each letter */
-  }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
 
-  .bounce:nth-child(3) {
-    animation-delay: 0.3s; /* Adjust the delay for each letter */
-  }
+    .product-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 48px;
+    }
 
-  .bounce:nth-child(4) {
-    animation-delay: 0.45s; /* Adjust the delay for each letter */
-  }
+    .card-img-container {
+        overflow: hidden;
+        position: relative;
+    }
 
-  .bounce:nth-child(5) {
-    animation-delay: 0.6s; /* Adjust the delay for each letter */
-  }
+    .product-actions {
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
 
-  .bounce:nth-child(6) {
-    animation-delay: 0.75s; /* Adjust the delay for each letter */
-  }
+    .product-card:hover .product-actions {
+        opacity: 1;
+    }
+
+    /* Banner Cards */
+    .banner-card {
+        transition: all 0.3s ease;
+    }
+
+    .banner-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Features */
+    .feature-card {
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+
+    .feature-icon {
+        transition: all 0.3s ease;
+    }
+
+    /* Categories */
+    .category-card .card {
+        transition: all 0.3s ease;
+    }
+
+    .category-card:hover .card {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .category-icon {
+        transition: all 0.3s ease;
+    }
+
+    .category-card:hover .category-icon {
+        transform: scale(1.1);
+    }
+
+    /* Wave Divider */
+    .wave-divider {
+        display: block;
+        width: 100%;
+        height: 120px;
+        margin-bottom: -120px;
+        position: relative;
+        z-index: 1;
+    }
 </style>
 
 {% endblock %}
